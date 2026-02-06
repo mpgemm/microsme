@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <arm_bf16.h>
 #include <arm_neon.h>
 #include <sys/time.h>
+#include <time.h>
 #include "examples.h"
 
 extern void example_sme_fmopa_fp32_fp32_fp32( float * i_a,
@@ -16,6 +18,8 @@ extern void example_zip4_fp32( float * i_a,
                                float * o_b );
 extern void example_ld1w_2_pred( float * i_a,
                                  float * o_b );
+
+
 
 void showcase_fmopa_fp32_fp32_fp32() {
     printf( "Running example FP32 SME FMOPA...\n" );

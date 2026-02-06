@@ -11,6 +11,9 @@
 #include <string>
 #include <os/proc.h>
 
+#include <sys/sysctl.h>
+
+
 extern "C" {
   int peak_neon_fmla_fp32_fp32_fp32( int64_t i_num_reps );
   int peak_neon_fmla_fp64_fp64_fp64( int64_t i_num_reps );
@@ -21,21 +24,52 @@ extern "C" {
   int peak_sme_fmopa_1_fp32_fp32_fp32( int64_t i_num_reps );
   int peak_sme_fmopa_2_fp32_fp32_fp32( int64_t i_num_reps );
   int peak_sme_fmopa_4_fp32_fp32_fp32( int64_t i_num_reps );
+    
+  int peak_sme_fmopa_3_fp32_fp32_fp32( int64_t i_num_reps );
+  int peak_sme_fmopa_2_4_fp32_fp32_fp32( int64_t i_num_reps );
+  int peak_sme_2_bfmopa_bf16_bf16_fp32( int64_t i_num_reps );
+
   int peak_sme_fmopa_4_fp32_fp32_fp32_predicated_15( int64_t i_num_reps);
   int peak_sme_fmopa_4_fp32_fp32_fp32_predicated_8( int64_t i_num_reps);
   int peak_sme_fmopa_4_reorder_fp32_fp32_fp32( int64_t i_num_reps );
   int peak_sme_fmopa_fp64_fp64_fp64( int64_t i_num_reps );
+  int peak_sme_1_fmopa_fp64_fp64_fp64( int64_t i_num_reps );
+  int peak_sme_2_fmopa_fp64_fp64_fp64( int64_t i_num_reps );
+  int peak_sme_3_fmopa_fp64_fp64_fp64( int64_t i_num_reps );
+  int peak_sme_4_fmopa_fp64_fp64_fp64( int64_t i_num_reps );
+  int peak_sme_5_fmopa_fp64_fp64_fp64( int64_t i_num_reps );
+  int peak_sme_6_fmopa_fp64_fp64_fp64( int64_t i_num_reps );
+  int peak_sme_7_fmopa_fp64_fp64_fp64( int64_t i_num_reps );
+
+
   int peak_sme_fmopa_smstart_smstop_8_fp32_fp32_fp32( int64_t i_num_reps );
   int peak_sme_fmopa_smstart_smstop_16_fp32_fp32_fp32( int64_t i_num_reps );
   int peak_sme_fmopa_smstart_smstop_32_fp32_fp32_fp32( int64_t i_num_reps );
   int peak_sme_fmopa_smstart_smstop_64_fp32_fp32_fp32( int64_t i_num_reps );
   int peak_sme_fmopa_smstart_smstop_128_fp32_fp32_fp32( int64_t i_num_reps );
   int peak_sme_fmopa_fp16_fp16_fp32( int64_t i_num_reps );
+  int peak_sme_1_fmopa_fp16_fp16_fp32(int64_t i_num_reps);
   int peak_sme_fmopa_fp16_fp16_fp16( int64_t i_num_reps );
   int peak_sme_bfmopa_bf16_bf16_fp32( int64_t i_num_reps );
   int peak_sme_bfmopa_bf16_bf16_bf16( int64_t i_num_reps );
+
   int peak_sme_smopa_i8_i8_i32( int64_t i_num_reps );
+  int peak_sme_1_smopa_i8_i8_i32( int64_t i_num_reps );
+  int peak_sme_2_smopa_i8_i8_i32( int64_t i_num_reps );
+  int peak_sme_3_smopa_i8_i8_i32( int64_t i_num_reps );
+
   int peak_sme_smopa_i16_i16_i32( int64_t i_num_reps );
+  int peak_sme_1_smopa_i16_i16_i32( int64_t i_num_reps );
+  int peak_sme_2_smopa_i16_i16_i32( int64_t i_num_reps );
+  int peak_sme_3_smopa_i16_i16_i32( int64_t i_num_reps );
+
+  int peak_sme_smopa_i32_i32_i32(int64_t i_num_reps);
+  int peak_sme_1_smopa_i32_i32_i32(int64_t i_num_reps);
+  int peak_sme_2_smopa_i32_i32_i32(int64_t i_num_reps);
+  int peak_sme_3_smopa_i32_i32_i32(int64_t i_num_reps);
+
+  
+  
   int peak_amx_fma_fp32_fp32_fp32( int64_t i_num_reps );
   int peak_sme_fmla_4_fp32_fp32_fp32( int64_t i_num_reps );
   int peak_sme_fmla_4_bf16_bf16_fp32( int64_t i_num_reps );
@@ -63,6 +97,10 @@ extern "C" {
   void load_data_sme_4_z_strided( int64_t    i_num_reps,
                                   int64_t    i_num_vals,
                                   float    * i_a  );
+  
+  void load_data_sme_4_d_z_strided( int64_t    i_num_reps,
+                                    int64_t    i_num_vals,
+                                    float    * i_a  );
 
   void store_data_sme_str_za( int64_t  i_num_reps,
                               int64_t  i_num_vals,
@@ -85,6 +123,12 @@ extern "C" {
   void store_data_sme_4_z_strided( int64_t  i_num_reps,
                                    int64_t  i_num_vals,
                                    float  * o_b  );
+  void load_data_sme_1_h_z( int64_t  i_num_reps,
+                          int64_t  i_num_vals,
+                          float  * i_a  );
+  void load_data_sme_4_h_z( int64_t  i_num_reps,
+                          int64_t  i_num_vals,
+                          float  * i_a  );
 }
 
 enum bandwidth_kernel {
@@ -94,14 +138,17 @@ enum bandwidth_kernel {
   LD1W_Z_4         = 3,
   LD1W_Z_STRIDED_2 = 4,
   LD1W_Z_STRIDED_4 = 5,
-  LDR_ZA           = 6,
-  STR_Z            = 7,
-  ST1W_Z_1         = 8,
-  ST1W_Z_2         = 9,
-  ST1W_Z_4         = 10,
-  ST1W_Z_STRIDED_2 = 11,
-  ST1W_Z_STRIDED_4 = 12,
-  STR_ZA           = 13
+  LD1D_Z_STRIDED_4 = 6,
+  LDR_ZA           = 7,
+  STR_Z            = 8,
+  ST1W_Z_1         = 9,
+  ST1W_Z_2         = 10,
+  ST1W_Z_4         = 11,
+  ST1W_Z_STRIDED_2 = 12,
+  ST1W_Z_STRIDED_4 = 13,
+  STR_ZA           = 14,
+  LD1H_Z_1         = 15,
+  LD1H_Z_4         = 16
 };
 
 void bench_micro( int        i_num_threads,
@@ -123,6 +170,7 @@ void bench_micro( int        i_num_threads,
     l_qos_class = QOS_CLASS_BACKGROUND;
   }
 
+  
   // set up dispatch
   dispatch_queue_attr_t l_attr = dispatch_queue_attr_make_with_qos_class( DISPATCH_QUEUE_CONCURRENT,
                                                                           l_qos_class,
@@ -153,6 +201,7 @@ void bench_micro( int        i_num_threads,
 
   // determine GOPS
   l_gops = i_kernel( 1 );
+    //std::cout << "l_gops: "<<l_gops<<std::endl;
   l_gops *= i_num_threads;
   l_gops *= i_num_reps;
   l_gops *= 1.0E-9;
@@ -163,114 +212,147 @@ void bench_micro( int        i_num_threads,
   std::cout << "  GOPS:         " << l_gops     << std::endl;
 }
 
-void bench_bandwidth( int64_t     i_num_vals,
+void bench_bandwidth( int64_t     num_threads, qos_class_t i_qos_class,
+                      int64_t     i_num_vals,
                       int64_t     i_offset_bytes,
                       int64_t     i_num_reps,
                       bandwidth_kernel i_kernel_type ) {
-  std::cout << "Running bandwidth benchmark..." << std::endl;
-
-  std::chrono::steady_clock::time_point l_start;
-  std::chrono::steady_clock::time_point l_end;
-  double l_duration = 0;
-  void (* l_kernel)( int64_t,
-                     int64_t,
-                     float  * ) = 0;
-
-  std::string l_kernel_name = "";
-  // load instructions
-  if( i_kernel_type == bandwidth_kernel::LDR_Z ) {
-    l_kernel_name = "LDR_Z";
-    l_kernel = load_data_sme_ldr;
-  }
-  else if( i_kernel_type == bandwidth_kernel::LD1W_Z_1 ) {
-    l_kernel_name = "LD1W_Z_1";
-    l_kernel = load_data_sme_1_z;
-  }
-  else if( i_kernel_type == bandwidth_kernel::LD1W_Z_2 ) {
-    l_kernel_name = "LD1W_Z_2";
-    l_kernel = load_data_sme_2_z;
-  }
-  else if( i_kernel_type == bandwidth_kernel::LD1W_Z_4 ) {
-    l_kernel_name = "LD1W_Z_4";
-    l_kernel = load_data_sme_4_z;
-  }
-  else if( i_kernel_type == bandwidth_kernel::LD1W_Z_STRIDED_2 ) {
-    l_kernel_name = "LD1W_Z_STRIDED_2";
-    l_kernel = load_data_sme_2_z_strided;
-  }
-  else if( i_kernel_type == bandwidth_kernel::LD1W_Z_STRIDED_4 ) {
-    l_kernel_name = "LD1W_Z_STRIDED_4";
-    l_kernel = load_data_sme_4_z_strided;
-  }
-  else if( i_kernel_type == bandwidth_kernel::LDR_ZA ) {
-    l_kernel_name = "LDR_ZA";
-    l_kernel = load_data_sme_ldr_za;
-  }
-  // store instructions
-  else if( i_kernel_type == bandwidth_kernel::STR_Z ) {
-    l_kernel_name = "STR_Z";
-    l_kernel = store_data_sme_str;
-  }
-  else if( i_kernel_type == bandwidth_kernel::ST1W_Z_1 ) {
-    l_kernel_name = "ST1W_Z_1";
-    l_kernel = store_data_sme_1_z;
-  }
-  else if( i_kernel_type == bandwidth_kernel::ST1W_Z_2 ) {
-    l_kernel_name = "ST1W_Z_2";
-    l_kernel = store_data_sme_2_z;
-  }
-  else if( i_kernel_type == bandwidth_kernel::ST1W_Z_4 ) {
-    l_kernel_name = "ST1W_Z_4";
-    l_kernel = store_data_sme_4_z;
-  }
-  else if( i_kernel_type == bandwidth_kernel::ST1W_Z_STRIDED_2 ) {
-    l_kernel_name = "ST1W_Z_STRIDED_2";
-    l_kernel = store_data_sme_2_z_strided;
-  }
-  else if( i_kernel_type == bandwidth_kernel::ST1W_Z_STRIDED_4 ) {
-    l_kernel_name = "ST1W_Z_STRIDED_4";
-    l_kernel = store_data_sme_4_z_strided;
-  }
-  else if( i_kernel_type == bandwidth_kernel::STR_ZA ) {
-    l_kernel_name = "STR_ZA";
-    l_kernel = store_data_sme_str_za;
-  }
-  else {
-    std::cerr << "Unknown kernel type: " << i_kernel_type << std::endl;
-    return;
-  }
-
-  // allocate memory
-  float * l_a = 0;
-  float * l_b = 0;
-
-  posix_memalign( (void**) &l_a, 128, i_num_vals * sizeof(float) + 127 );
-  posix_memalign( (void**) &l_b, 128, i_num_vals * sizeof(float) + 127 );
-
-  l_a = (float*) ( (char *) l_a + i_offset_bytes );
-  l_b = (float*) ( (char *) l_b + i_offset_bytes );
-
-  // init data
-  for( int64_t l_en = 0; l_en < i_num_vals; l_en++ ) {
-    l_a[l_en] = 7743;
-    l_b[l_en] = 0;
-  }
-
-  // run bandwidth benchmark
-  l_start = std::chrono::steady_clock::now();
-  l_kernel( i_num_reps,
-            i_num_vals,
-            l_a );
+    std::cout << "Running bandwidth benchmark..." << std::endl;
+    
+    std::chrono::steady_clock::time_point l_start;
+    std::chrono::steady_clock::time_point l_end;
+    double l_duration = 0;
+    void (* l_kernel)( int64_t,
+                       int64_t,
+                       float  * ) = 0;
+    
+    std::string l_kernel_name = "";
+    // load instructions
+    if( i_kernel_type == bandwidth_kernel::LDR_Z ) {
+        l_kernel_name = "LDR_Z";
+        l_kernel = load_data_sme_ldr;
+    }
+    else if( i_kernel_type == bandwidth_kernel::LD1W_Z_1 ) {
+        l_kernel_name = "LD1W_Z_1";
+        l_kernel = load_data_sme_1_z;
+    }
+    else if( i_kernel_type == bandwidth_kernel::LD1W_Z_2 ) {
+        l_kernel_name = "LD1W_Z_2";
+        l_kernel = load_data_sme_2_z;
+    }
+    else if( i_kernel_type == bandwidth_kernel::LD1W_Z_4 ) {
+        l_kernel_name = "LD1W_Z_4";
+        l_kernel = load_data_sme_4_z;
+    }
+    else if( i_kernel_type == bandwidth_kernel::LD1W_Z_STRIDED_2 ) {
+        l_kernel_name = "LD1W_Z_STRIDED_2";
+        l_kernel = load_data_sme_2_z_strided;
+    }
+    else if( i_kernel_type == bandwidth_kernel::LD1W_Z_STRIDED_4 ) {
+        l_kernel_name = "LD1W_Z_STRIDED_4";
+        l_kernel = load_data_sme_4_z_strided;
+    }
+    else if( i_kernel_type == bandwidth_kernel::LD1D_Z_STRIDED_4){
+        l_kernel_name = "LD1D_Z_STRIDED_4";
+        l_kernel = load_data_sme_4_d_z_strided;
+    }
+    else if( i_kernel_type == bandwidth_kernel::LDR_ZA ) {
+        l_kernel_name = "LDR_ZA";
+        l_kernel = load_data_sme_ldr_za;
+    }
+    // store instructions
+    else if( i_kernel_type == bandwidth_kernel::STR_Z ) {
+        l_kernel_name = "STR_Z";
+        l_kernel = store_data_sme_str;
+    }
+    else if( i_kernel_type == bandwidth_kernel::ST1W_Z_1 ) {
+        l_kernel_name = "ST1W_Z_1";
+        l_kernel = store_data_sme_1_z;
+    }
+    else if( i_kernel_type == bandwidth_kernel::ST1W_Z_2 ) {
+        l_kernel_name = "ST1W_Z_2";
+        l_kernel = store_data_sme_2_z;
+    }
+    else if( i_kernel_type == bandwidth_kernel::ST1W_Z_4 ) {
+        l_kernel_name = "ST1W_Z_4";
+        l_kernel = store_data_sme_4_z;
+    }
+    else if( i_kernel_type == bandwidth_kernel::ST1W_Z_STRIDED_2 ) {
+        l_kernel_name = "ST1W_Z_STRIDED_2";
+        l_kernel = store_data_sme_2_z_strided;
+    }
+    else if( i_kernel_type == bandwidth_kernel::ST1W_Z_STRIDED_4 ) {
+        l_kernel_name = "ST1W_Z_STRIDED_4";
+        l_kernel = store_data_sme_4_z_strided;
+    }
+    else if( i_kernel_type == bandwidth_kernel::STR_ZA ) {
+        l_kernel_name = "STR_ZA";
+        l_kernel = store_data_sme_str_za;
+    }
+    else if( i_kernel_type == bandwidth_kernel::LD1H_Z_1 ) {
+        l_kernel_name = "LD1H_Z_1";
+        l_kernel = load_data_sme_1_h_z;
+    }
+    else if( i_kernel_type == bandwidth_kernel::LD1H_Z_4 ) {
+        l_kernel_name = "LD1H_Z_4";
+        l_kernel = load_data_sme_4_h_z;
+    }
+    else {
+        std::cerr << "Unknown kernel type: " << i_kernel_type << std::endl;
+        return;
+    }
+    
+    float ** l_a    = new float*[num_threads];
+    float ** l_b    = new float*[num_threads];
+    
+    for( int64_t l_td = 0; l_td < num_threads; l_td++ ) {
+        posix_memalign( (void**)&l_a[l_td],     128, i_num_vals * sizeof(float) + 127  );
+        posix_memalign( (void**)&l_b[l_td],    128, i_num_vals * sizeof(float) + 127 );
+    }
+    
+    for( int64_t l_td = 0; l_td < num_threads; l_td++ ) {
+        l_a[l_td] = (float*) ( (char *) l_a[l_td] + i_offset_bytes );
+        l_b[l_td] = (float*) ( (char *) l_b[l_td] + i_offset_bytes );
+    }
+    
+    // init data
+    for( int64_t l_td = 0; l_td < num_threads; l_td++ ) {
+        for( int64_t l_en = 0; l_en < i_num_vals; l_en++ ) {
+            l_a[l_td][l_en] = 7743;
+            l_b[l_td][l_en] = 0;
+        }
+    }
+    dispatch_queue_attr_t l_attr = dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_CONCURRENT,
+                                                                           i_qos_class,
+                                                                           0 );
+    dispatch_queue_t l_queue = dispatch_queue_create( "bandwidth_queue",
+                                                      l_attr );
+    dispatch_group_t l_group = dispatch_group_create();
+    
+    // run bandwidth benchmark
+    l_start = std::chrono::steady_clock::now();
+    
+    for( int64_t l_td = 0; l_td < num_threads ; l_td++){
+        dispatch_group_async( l_group, l_queue,
+                              ^{   l_kernel( i_num_reps,
+                                             i_num_vals,
+                                             l_a[l_td] );
+        });
+    }
+ 
+    
+  dispatch_group_wait(l_group, DISPATCH_TIME_FOREVER);
   l_end = std::chrono::steady_clock::now();
   l_duration = std::chrono::duration_cast< std::chrono::duration<double> >( l_end - l_start ).count();
-
+    
   // print results
-  double l_num_bytes = i_num_reps * i_num_vals * 4;
+  double l_num_bytes = i_num_reps * i_num_vals * 4 * num_threads;
   double l_gibs = l_num_bytes / (1024.0*1024.0*1024.0);
          l_gibs /= l_duration;
   
   double l_mib_per_iter = i_num_vals * 4 / (1024.0*1024.0);
-
+    
+  std::cout << "  Threads:      " << num_threads << std::endl;
   std::cout << "  Kernel:       " << l_kernel_name << std::endl;
   std::cout << "  #Values:      " << i_num_vals << std::endl;
   std::cout << "  Offset:       " << i_offset_bytes << std::endl;
@@ -286,11 +368,16 @@ void bench_bandwidth( int64_t     i_num_vals,
                               << l_duration     << ","
                               << l_gibs         << std::endl;
 
-  // free memory
-  l_a = (float*) ( (char *) l_a - i_offset_bytes );
-  l_b = (float*) ( (char *) l_b - i_offset_bytes );
-  free( l_a );
-  free( l_b );
+    for( int64_t l_td = 0; l_td < num_threads; l_td++ ) {
+          l_a[l_td] = (float*) ( (char *) l_a[l_td] - i_offset_bytes );
+          l_b[l_td] = (float*) ( (char *) l_b[l_td] - i_offset_bytes );
+    }
+    
+    for( int64_t l_td = 0; l_td < num_threads; l_td++ ) {
+        free(l_a[l_td]);
+        free(l_b[l_td]);
+   }
+    
 }
 
 void bench_cblas( int64_t i_m,
@@ -339,7 +426,7 @@ void bench_cblas( int64_t i_m,
   }
 
   // warmup
-  cblas_sgemm( CblasColMajor,
+  cblas_sgemm( CblasRowMajor,
                i_trans_a == 0 ? CblasNoTrans : CblasTrans,
                i_trans_b == 0 ? CblasNoTrans : CblasTrans,
                i_m,
@@ -356,7 +443,7 @@ void bench_cblas( int64_t i_m,
 
   l_start = std::chrono::steady_clock::now();
   for( int64_t l_re = 0; l_re < i_num_reps_initial; l_re++) {
-    cblas_sgemm( CblasColMajor,
+    cblas_sgemm( CblasRowMajor,
                  i_trans_a == 0 ? CblasNoTrans : CblasTrans,
                  i_trans_b == 0 ? CblasNoTrans : CblasTrans,
                  i_m,
@@ -381,7 +468,7 @@ void bench_cblas( int64_t i_m,
 
   l_start = std::chrono::steady_clock::now();
   for( int64_t l_re = 0; l_re < l_num_reps; l_re++ ) {
-    cblas_sgemm( CblasColMajor,
+    cblas_sgemm( CblasRowMajor,
                  i_trans_a == 0 ? CblasNoTrans : CblasTrans,
                  i_trans_b == 0 ? CblasNoTrans : CblasTrans,
                  i_m,
@@ -392,7 +479,7 @@ void bench_cblas( int64_t i_m,
                  i_lda,
                  l_b,
                  i_ldb,
-                 1,
+                 0,
                  l_c,
                  i_ldc );
   }
@@ -431,41 +518,41 @@ void run_micro_benchmark( int i_num_threads,
     std::cout << "  QoS: Default" << std::endl;
   }
 
-  std::cout << "Determining FP64 Neon FMLA performance..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 500000000 : 200000000,
-               peak_neon_fmla_fp64_fp64_fp64 );
+//  std::cout << "Determining FP64 Neon FMLA performance..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 500000000 : 200000000,
+//               peak_neon_fmla_fp64_fp64_fp64 );
+//
+//  std::cout << "Determining FP32 Neon FMLA performance..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 500000000 : 200000000,
+//               peak_neon_fmla_fp32_fp32_fp32 );
+//
+//  std::cout << "Determining FP16 Neon FMLA performance..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 500000000 : 200000000,
+//               peak_neon_fmla_fp16_fp16_fp16 );
 
-  std::cout << "Determining FP32 Neon FMLA performance..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 500000000 : 200000000,
-               peak_neon_fmla_fp32_fp32_fp32 );
-
-  std::cout << "Determining FP16 Neon FMLA performance..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 500000000 : 200000000,
-               peak_neon_fmla_fp16_fp16_fp16 );
-
-  std::cout << "Determining BF16-BF16-FP32 BFMMLA Neon performance" << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 100000000 : 40000000,
-               peak_neon_bfmmla_bf16_bf16_fp32 );
-
-  std::cout << "Determining FP32 SSVE FMLA (Z accumulation) performance..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 50000000 : 30000000,
-               peak_sve_fmla_streaming_fp32_fp32_fp32 );
-
-  std::cout << "Detemining FP64 SSVE FMLA (Z accumulation) performance..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 50000000 : 30000000,
-                peak_sve_fmla_streaming_fp64_fp64_fp64);
+//  std::cout << "Determining BF16-BF16-FP32 BFMMLA Neon performance" << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 100000000 : 40000000,
+//               peak_neon_bfmmla_bf16_bf16_fp32 );
+//
+//  std::cout << "Determining FP32 SSVE FMLA (Z accumulation) performance..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 50000000 : 30000000,
+//               peak_sve_fmla_streaming_fp32_fp32_fp32 );
+//
+//  std::cout << "Detemining FP64 SSVE FMLA (Z accumulation) performance..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 50000000 : 30000000,
+//                peak_sve_fmla_streaming_fp64_fp64_fp64);
 
   std::cout << "Determining FP32 AMX performance..." << std::endl;
   bench_micro( i_num_threads,
@@ -478,6 +565,7 @@ void run_micro_benchmark( int i_num_threads,
                i_qos_class,
                (i_qos_class < 3) ? 35000000 : 25000000,
                peak_sme_fmopa_1_fp32_fp32_fp32 );
+    
 
   std::cout << "Determining FP32 SME FMOPA performance (2 tiles)..." << std::endl;
   bench_micro( i_num_threads,
@@ -485,107 +573,232 @@ void run_micro_benchmark( int i_num_threads,
                (i_qos_class < 3) ? 75000000 : 25000000,
                peak_sme_fmopa_2_fp32_fp32_fp32 );
 
+  std::cout << "Determining FP32 SME FMOPA performance (3 tiles)..." << std::endl;
+  bench_micro( i_num_threads,
+                 i_qos_class,
+                 (i_qos_class < 3) ? 100000000 : 25000000,
+                 peak_sme_fmopa_3_fp32_fp32_fp32 );
+//
   std::cout << "Determining FP32 SME FMOPA performance (4 tiles)..." << std::endl;
   bench_micro( i_num_threads,
                i_qos_class,
-               (i_qos_class < 3) ? 125000000 : 25000000,
+               (i_qos_class < 3) ? 100000000 : 25000000,
                peak_sme_fmopa_4_fp32_fp32_fp32 );
 
-  std::cout << "Determining FP32 SME predicated (8/16) FMOPA performance (4 tiles)..." << std::endl;
-  bench_micro( i_num_threads,
+//  std::cout << "Determining FP32 SME predicated (8/16) FMOPA performance (4 tiles)..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 125000000 : 25000000,
+//               peak_sme_fmopa_4_fp32_fp32_fp32_predicated_8 );
+//
+//  std::cout << "Determining FP32 SME predicated (15/16) FMOPA performance (4 tiles)..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 125000000 : 25000000,
+//               peak_sme_fmopa_4_fp32_fp32_fp32_predicated_15 );
+//
+//  std::cout << "Determining FP32 SME FMOPA performance (4 tiles, reordering)..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 125000000 : 25000000,
+//               peak_sme_fmopa_4_reorder_fp32_fp32_fp32 );
+
+//  std::cout << "Determining FP32 SME SMSTART-SMSTOP performance (8 instructions per block).." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 125000000 : 60000000,
+//               peak_sme_fmopa_smstart_smstop_8_fp32_fp32_fp32 );
+//
+//  std::cout << "Determining FP32 SME SMSTART-SMSTOP performance (16 instructions per block)..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 125000000 : 60000000,
+//               peak_sme_fmopa_smstart_smstop_16_fp32_fp32_fp32 );
+//
+//  std::cout << "Determining FP32 SME SMSTART-SMSTOP performance (32 instructions per block)..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 125000000 : 60000000,
+//               peak_sme_fmopa_smstart_smstop_32_fp32_fp32_fp32 );
+//
+//  std::cout << "Determining FP32 SME SMSTART-SMSTOP performance (64 instructions per block)..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 100000000 : 60000000,
+//               peak_sme_fmopa_smstart_smstop_64_fp32_fp32_fp32 );
+//
+//  std::cout << "Determining FP32 SME SMSTART-SMSTOP performance (128 instructions per block)..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 50000000 : 60000000,
+//               peak_sme_fmopa_smstart_smstop_128_fp32_fp32_fp32 );
+
+  
+    std::cout << "Determining BF16-BF16-FP32 SME BFMOPA performance..." << std::endl;
+    bench_micro( i_num_threads,
+                 i_qos_class,
+                 (i_qos_class < 3) ? 125000000 : 25000000,
+                 peak_sme_bfmopa_bf16_bf16_fp32 );
+    
+    std::cout << "Determining FP16-FP16-FP32 SME FMOPA performance..." << std::endl;
+    bench_micro( i_num_threads,
                i_qos_class,
                (i_qos_class < 3) ? 125000000 : 25000000,
-               peak_sme_fmopa_4_fp32_fp32_fp32_predicated_8 );
-
-  std::cout << "Determining FP32 SME predicated (15/16) FMOPA performance (4 tiles)..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 125000000 : 25000000,
-               peak_sme_fmopa_4_fp32_fp32_fp32_predicated_15 );
-
-  std::cout << "Determining FP32 SME FMOPA performance (4 tiles, reordering)..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 125000000 : 25000000,
-               peak_sme_fmopa_4_reorder_fp32_fp32_fp32 );
-
-  std::cout << "Determining FP32 SME SMSTART-SMSTOP performance (8 instructions per block).." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 125000000 : 60000000,
-               peak_sme_fmopa_smstart_smstop_8_fp32_fp32_fp32 );
-
-  std::cout << "Determining FP32 SME SMSTART-SMSTOP performance (16 instructions per block)..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 125000000 : 60000000,
-               peak_sme_fmopa_smstart_smstop_16_fp32_fp32_fp32 );
-
-  std::cout << "Determining FP32 SME SMSTART-SMSTOP performance (32 instructions per block)..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 125000000 : 60000000,
-               peak_sme_fmopa_smstart_smstop_32_fp32_fp32_fp32 );
-
-  std::cout << "Determining FP32 SME SMSTART-SMSTOP performance (64 instructions per block)..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 100000000 : 60000000,
-               peak_sme_fmopa_smstart_smstop_64_fp32_fp32_fp32 );
-
-  std::cout << "Determining FP32 SME SMSTART-SMSTOP performance (128 instructions per block)..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 50000000 : 60000000,
-               peak_sme_fmopa_smstart_smstop_128_fp32_fp32_fp32 );
-
-  std::cout << "Determining FP16-FP16-FP32 SME FMOPA performance..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 75000000 : 15000000,
                peak_sme_fmopa_fp16_fp16_fp32 );
 
-  std::cout << "Determining BF16-BF16-FP32 SME BFMOPA performance..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 75000000 : 15000000,
-               peak_sme_bfmopa_bf16_bf16_fp32 );
+    std::cout << "Determining FP16-FP16-FP32 SME FMOPA performance (1 tile)..." << std::endl;
+    bench_micro( i_num_threads,
+                   i_qos_class,
+                   (i_qos_class < 3) ? 50000000 : 25000000,
+                   peak_sme_1_fmopa_fp16_fp16_fp32 );
 
-  std::cout << "Determining FP64 SME FMOPA performance ..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 125000000 : 25000000,
-               peak_sme_fmopa_fp64_fp64_fp64 );
+  std::cout << "Determining BF16-BF16-FP32 SME BFMOPA performance (2 tiles)..." << std::endl;
+    bench_micro( i_num_threads,
+                   i_qos_class,
+                   (i_qos_class < 3) ? 75000000 : 25000000,
+                   peak_sme_2_bfmopa_bf16_bf16_fp32 );
 
-  std::cout << "Determining I8-I8-I32 SME SMOPA performance..." << std::endl;
+  
+
+  
+  std::cout << "Determining FP64 SME FMOPA performance ...(1 tile)" << std::endl;
+   bench_micro( i_num_threads,
+                 i_qos_class,
+                 (i_qos_class < 3) ? 125000000 : 25000000,
+                 peak_sme_1_fmopa_fp64_fp64_fp64 );
+  std::cout << "Determining FP64 SME FMOPA performance ...(2 tile)" << std::endl;
+     bench_micro( i_num_threads,
+                   i_qos_class,
+                   (i_qos_class < 3) ? 125000000 : 25000000,
+                   peak_sme_2_fmopa_fp64_fp64_fp64 );
+  std::cout << "Determining FP64 SME FMOPA performance ...(3 tile)" << std::endl;
+     bench_micro( i_num_threads,
+                   i_qos_class,
+                   (i_qos_class < 3) ? 125000000 : 25000000,
+                   peak_sme_3_fmopa_fp64_fp64_fp64 );
+  std::cout << "Determining FP64 SME FMOPA performance ...(4 tiles)" << std::endl;
+    bench_micro( i_num_threads,
+                  i_qos_class,
+                  (i_qos_class < 3) ? 125000000 : 25000000,
+                  peak_sme_4_fmopa_fp64_fp64_fp64 );
+  std::cout << "Determining FP64 SME FMOPA performance ...(5 tiles)" << std::endl;
+      bench_micro( i_num_threads,
+                    i_qos_class,
+                    (i_qos_class < 3) ? 125000000 : 25000000,
+                    peak_sme_5_fmopa_fp64_fp64_fp64 );
+  std::cout << "Determining FP64 SME FMOPA performance ...(6 tiles)" << std::endl;
+      bench_micro( i_num_threads,
+                    i_qos_class,
+                    (i_qos_class < 3) ? 125000000 : 25000000,
+                    peak_sme_6_fmopa_fp64_fp64_fp64 );
+ std::cout << "Determining FP64 SME FMOPA performance ...(7 tiles)" << std::endl;
+    bench_micro( i_num_threads,
+                 i_qos_class,
+                 (i_qos_class < 3) ? 125000000 : 25000000,
+                 peak_sme_7_fmopa_fp64_fp64_fp64 );
+  std::cout << "Determining FP64 SME FMOPA performance ...(8 tiles)" << std::endl;
+    bench_micro( i_num_threads,
+                 i_qos_class,
+                 (i_qos_class < 3) ? 125000000 : 25000000,
+                 peak_sme_fmopa_fp64_fp64_fp64 );
+    
+    
+    
+  std::cout << "Determining I8-I8-I32 SME SMOPA performance (1 tile)..." << std::endl;
+    bench_micro( i_num_threads,
+                 i_qos_class,
+                  (i_qos_class < 3) ? 50000000 : 15000000,
+                   peak_sme_1_smopa_i8_i8_i32 );
+    
+  std::cout << "Determining I8-I8-I32 SME SMOPA performance (2 tiles)..." << std::endl;
+    bench_micro( i_num_threads,
+                 i_qos_class,
+                  (i_qos_class < 3) ? 75000000 : 15000000,
+                   peak_sme_2_smopa_i8_i8_i32 );
+    
+  std::cout << "Determining I8-I8-I32 SME SMOPA performance (3 tiles)..." << std::endl;
+    bench_micro( i_num_threads,
+                 i_qos_class,
+                  (i_qos_class < 3) ? 100000000 : 15000000,
+                   peak_sme_3_smopa_i8_i8_i32 );
+    
+  std::cout << "Determining I8-I8-I32 SME SMOPA performance (4 tiles)..." << std::endl;
   bench_micro( i_num_threads,
                i_qos_class,
                (i_qos_class < 3) ? 75000000 : 15000000,
                peak_sme_smopa_i8_i8_i32 );
+//
+//  
+//    
+  std::cout << "Determining I16-I16-I32 SME SMOPA performance (1 tiles)..." << std::endl;
+      bench_micro( i_num_threads,
+                   i_qos_class,
+                   (i_qos_class < 3) ? 35000000 : 15000000,
+                   peak_sme_1_smopa_i16_i16_i32 );
+    
+    
+  std::cout << "Determining I16-I16-I32 SME SMOPA performance (2 tiles)..." << std::endl;
+    bench_micro( i_num_threads,
+                 i_qos_class,
+                 (i_qos_class < 3) ? 75000000 : 15000000,
+                 peak_sme_2_smopa_i16_i16_i32 );
+    
+  std::cout << "Determining I16-I16-I32 SME SMOPA performance (3 tiles)..." << std::endl;
+      bench_micro( i_num_threads,
+                   i_qos_class,
+                   (i_qos_class < 3) ? 100000000 : 15000000,
+                   peak_sme_3_smopa_i16_i16_i32 );
 
-  std::cout << "Determining I16-I16-I32 SME FMOPA performance..." << std::endl;
+  std::cout << "Determining I16-I16-I32 SME SMOPA performance (4 tiles)..." << std::endl;
   bench_micro( i_num_threads,
                i_qos_class,
                (i_qos_class < 3) ? 75000000 : 15000000,
                peak_sme_smopa_i16_i16_i32 );
-
-  std::cout << "Determining FP32 SME FMLA performance..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 125000000 : 50000000,
-               peak_sme_fmla_4_fp32_fp32_fp32 );
-
-  std::cout << "Determining FP64 SME FMLA performance..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 150000000 : 50000000,
-               peak_sme_fmla_4_fp64_fp64_fp64 );
-
-  std::cout << "Determining BF16-BF16-FP32 SME BFDOT performance..." << std::endl;
-  bench_micro( i_num_threads,
-               i_qos_class,
-               (i_qos_class < 3) ? 100000000 : 25000000,
-               peak_sme_fmla_4_bf16_bf16_fp32 );
+  
+  
+    
+    std::cout << "Determining I32-I32-I32 SME SMOPA performance (1 tile)..." << std::endl;
+        bench_micro( i_num_threads,
+                     i_qos_class,
+                     (i_qos_class < 3) ? 50000000 : 15000000,
+                     peak_sme_1_smopa_i32_i32_i32 );
+    
+  std::cout << "Determining I32-I32-I32 SME SMOPA performance (2 tiles)..." << std::endl;
+      bench_micro( i_num_threads,
+                   i_qos_class,
+                   (i_qos_class < 3) ? 75000000 : 15000000,
+                   peak_sme_2_smopa_i32_i32_i32 );
+  
+  std::cout << "Determining I32-I32-I32 SME SMOPA performance (3 tiles)..." << std::endl;
+        bench_micro( i_num_threads,
+                     i_qos_class,
+                     (i_qos_class < 3) ? 100000000 : 15000000,
+                     peak_sme_3_smopa_i32_i32_i32 );
+    
+  std::cout << "Determining I32-I32-I32 SME SMOPA performance (4 tiles)..." << std::endl;
+    bench_micro( i_num_threads,
+                 i_qos_class,
+                 (i_qos_class < 3) ? 125000000 : 15000000,
+                 peak_sme_smopa_i32_i32_i32 );
+    
+    
+//  std::cout << "Determining FP32 SME FMLA performance..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 125000000 : 50000000,
+//               peak_sme_fmla_4_fp32_fp32_fp32 );
+//
+//  std::cout << "Determining FP64 SME FMLA performance..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 150000000 : 50000000,
+//               peak_sme_fmla_4_fp64_fp64_fp64 );
+//
+//  std::cout << "Determining BF16-BF16-FP32 SME BFDOT performance..." << std::endl;
+//  bench_micro( i_num_threads,
+//               i_qos_class,
+//               (i_qos_class < 3) ? 100000000 : 25000000,
+//               peak_sme_fmla_4_bf16_bf16_fp32 );
 }
 
 /*
@@ -593,11 +806,22 @@ void run_micro_benchmark( int i_num_threads,
  */
 void run_cblas_benchmark(){
   std::cout << "Running CBLAS benchmarks..." << std::endl;
-  int64_t l_size = 16;
+  int64_t l_size = 512;
   int64_t l_num_reps_initial = 65536;
   double  l_target_time = 1.0;
   for( int64_t l_si = 0; l_si < 10; l_si++ ) {
-    bench_cblas( l_size,
+//    bench_cblas( l_size,
+//                 l_size,
+//                   l_size,
+//                   l_size,
+//                   l_size,
+//                   l_size,
+//                   1,
+//                   0,
+//                   l_num_reps_initial,
+//                   l_target_time );
+      
+      bench_cblas( l_size,
                  l_size,
                  l_size,
                  l_size,
@@ -620,15 +844,58 @@ void run_cblas_benchmark(){
                  l_target_time );
 
     l_size *= 2;
-    l_num_reps_initial /= 8;
+    l_num_reps_initial /= 2;
     l_num_reps_initial = l_num_reps_initial > 1 ? l_num_reps_initial : 1;
   }
+}
+
+
+//new add
+size_t getAvailableMemory() {
+    int mib[2];
+    size_t len;
+    uint64_t mem;
+
+    // 获取可用内存信息
+    mib[0] = CTL_HW;
+    mib[1] = HW_MEMSIZE;
+    len = sizeof(mem);
+    if (sysctl(mib, 2, &mem, &len, nullptr, 0) == -1) {
+        perror("sysctl");
+        return 0;
+    }
+
+    // 获取可用内存
+    vm_size_t page_size;
+    mach_port_t mach_port = mach_host_self();
+    mach_msg_type_number_t count = HOST_VM_INFO_COUNT;
+    vm_statistics_data_t vm_stat;
+
+    if (host_page_size(mach_port, &page_size) != KERN_SUCCESS) {
+        perror("host_page_size");
+        return 0;
+    }
+
+    if (host_statistics(mach_port, HOST_VM_INFO, (host_info_t)&vm_stat, &count) != KERN_SUCCESS) {
+        perror("host_statistics");
+        return 0;
+    }
+
+    uint64_t free_memory = vm_stat.free_count * page_size;
+    uint64_t active_memory = vm_stat.active_count * page_size;
+    uint64_t inactive_memory = vm_stat.inactive_count * page_size;
+    uint64_t wired_memory = vm_stat.wire_count * page_size;
+
+    // 可用内存 = 空闲内存 + 非活动内存
+    uint64_t available_memory = free_memory + inactive_memory;
+    
+    return available_memory;
 }
 
 /*
  * Run bandwidth benchmarks
  */
-void run_bandwidth_benchmark( int i_kernel_type,
+void run_bandwidth_benchmark( int num_threads, int i_kernel_type,
                          int i_align_bytes,
                          int i_qos_class ){
   std::cout << "Running bandwidth benchmarks..." << std::endl;
@@ -636,7 +903,8 @@ void run_bandwidth_benchmark( int i_kernel_type,
   std::cout << "  Align bytes:            " << i_align_bytes << std::endl;
   std::cout << "  QoS class:              " << i_qos_class   << std::endl;
 
-  std::size_t l_mem_avail = os_proc_available_memory();
+  std::size_t l_mem_avail = getAvailableMemory();
+  //std::size_t l_mem_avail = os_proc_available_memory();
   double l_mem_avail_mib = l_mem_avail / (1024.0*1024.0);
   std::cout << "  Available memory (MiB): " << l_mem_avail_mib << std::endl;
 
@@ -654,11 +922,11 @@ void run_bandwidth_benchmark( int i_kernel_type,
   else if( i_qos_class == 4 ) {
     l_qos_class = QOS_CLASS_BACKGROUND;
   }
-  pthread_set_qos_class_self_np( l_qos_class, 0 );
+  //pthread_set_qos_class_self_np( l_qos_class, 0 );
 
   int64_t l_off = i_align_bytes % 128;
 
-    int64_t l_num_values[47] = {          256,    //   2 KiB
+  int64_t l_num_values[49] = {          256,    //   2 KiB
                                           512,    //   4 KiB
                                          1024,    //   8 KiB
                                          2048,    //  16 KiB
@@ -674,7 +942,7 @@ void run_bandwidth_benchmark( int i_kernel_type,
                                        524288,    //   4 MiB
                                        786432,    //   6 MiB
                                        917504,    //   7 MiB
-                                      1048576,    //   8 MiB
+                                      1048576,    //   8 MiB        l_be = 22
 
                                       1179648,    //   9 MiB
                                       1310720,    //  10 MiB
@@ -704,8 +972,10 @@ void run_bandwidth_benchmark( int i_kernel_type,
                                       3932160,    //  30 MiB
                                       4063232,    //  31 MiB
                                       4194304,    //  32 MiB
+                                        6291456,      //  48MiB
                                       8388608,    //  64 MiB
-
+                                        12582912,    //  96 MiB
+      
                                       16777216,   // 128 MiB
                                       33554432,   // 256 MiB
                                       67108864,   // 512 MiB
@@ -715,7 +985,7 @@ void run_bandwidth_benchmark( int i_kernel_type,
                                      536870912,   //   4 GiB
                                     1073741824 }; //   8 GiB
 
-      int64_t l_num_reps[47] = {  994683648,    //   2 KiB
+      int64_t l_num_reps[49] = {  994683648,    //   2 KiB
                                   858734592,    //   4 KiB
                                   429367296,    //   8 KiB
                                   214683648,    //  16 KiB
@@ -761,8 +1031,10 @@ void run_bandwidth_benchmark( int i_kernel_type,
                                        51161,   //  30 MiB
                                        49492,   //  31 MiB
                                        32768,   //  32 MiB
+                                            16384,  // 48 MiB
                                         8192,   //  64 MiB
-
+                                            6144,   //  96 MiB
+          
                                         4096,   // 128 MiB
                                         2048,   // 256 MiB
                                         1024,   // 512 MiB
@@ -777,10 +1049,11 @@ void run_bandwidth_benchmark( int i_kernel_type,
       // sleep for 10 seconds to allow SoC to cool down
       std::this_thread::sleep_for( std::chrono::seconds( 10 )) ;
 
-      bench_bandwidth( l_num_values[l_be],
+      bench_bandwidth( num_threads, l_qos_class, l_num_values[l_be],
                        l_off,
                        l_num_reps[l_be]/2,
                        (bandwidth_kernel) i_kernel_type );
     }
   }
 }
+    

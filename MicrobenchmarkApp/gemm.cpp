@@ -5,6 +5,7 @@
 #include <chrono>
 #include <cstdint>
 #include <Accelerate/Accelerate.h>
+#include <stdlib.h>
 
 void rep_accelerate( int64_t         i_num_reps,
                      int64_t         i_m,
@@ -266,6 +267,7 @@ void bench_gemm( int        i_num_threads,
 
 void run_gemm( int i_num_threads,
                int i_qos_type ) {
+  //bench_gemm( i_num_threads,i_qos_type,20000000,64,16,2,gemm_micro_64_16_2 );
   bench_gemm( i_num_threads,
               i_qos_type,
               20000000,
@@ -297,4 +299,73 @@ void run_gemm( int i_num_threads,
               32,
               32,
               gemm_micro_32_no_trans );
+}
+
+
+
+#define L1_CACHE_SIZE 131072   // 128 KB
+#define LOAD_WIDTH    (16 * 2) // 每次加载 32 个 float（128B）
+#define FLOAT_SIZE    4
+
+const int K = (L1_CACHE_SIZE / FLOAT_SIZE / LOAD_WIDTH) * 8;
+
+
+float N[1][LOAD_WIDTH];
+float M[K][LOAD_WIDTH];
+float *C;
+
+void init_C() {
+    for (size_t i = 0; i < LOAD_WIDTH; i++) {
+        N[0][i] = 2.0 * (float)drand48( ) - 1.0 + 0.0000001 * (i/LOAD_WIDTH);
+    }
+
+    for (size_t i = 0; i < K; i++) {
+        for (size_t j = 0; j < LOAD_WIDTH; j++) {
+            M[i][j] = 2.0 * (float)drand48( ) - 1.0 + 0.0000001 * (i/LOAD_WIDTH);
+        }
+    }
+    
+    posix_memalign( (void**) &C, 128,K * LOAD_WIDTH * sizeof(float));
+    for (size_t i = 0; i < K * LOAD_WIDTH; i++) {
+        C[i] = (float)i/16.52525;
+    }
+}
+
+void func2() {
+    asm volatile("smstart" :::);
+    for (size_t i = 0; i < K; i++) {
+        float *ptr = &M[i][0];
+        asm volatile(
+            "ld1w {z0.s}, p0/z, [%[src]]\n"
+            :
+            : [src] "r"(ptr)
+            : "p0","z0"
+        );
+    }
+    asm volatile("smstop" :::);
+}
+
+void showcase_cachetest(){
+    
+    init_C();
+    
+    std::chrono::steady_clock::time_point l_start = std::chrono::steady_clock::now();
+    asm volatile("smstart" :::);
+    for (size_t i = 0; i < K; i++) {
+        float *ptr = &M[i][0];
+        asm volatile(
+            "ld1w {z0.s}, p0/z, [%[src]]\n"
+            :
+            : [src] "r"(ptr)
+            : "p0","z0"
+        );
+    }
+    asm volatile("smstop" :::);
+    std::chrono::steady_clock::time_point l_end = std::chrono::steady_clock::now();
+
+    double elapsed = std::chrono::duration_cast< std::chrono::duration<double> >( l_end - l_start ).count();
+    double total_bytes = K * LOAD_WIDTH * FLOAT_SIZE;
+    double bandwidth = total_bytes / elapsed / 1e9; // GB/s
+
+    printf("func2:\n  Time: %.6f sec\n  Bandwidth: %.2f GB/s\n\n", elapsed, bandwidth);
 }

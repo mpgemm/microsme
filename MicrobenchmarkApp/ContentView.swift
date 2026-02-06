@@ -16,14 +16,17 @@ enum BandwidthKernel: Int32 {
   case ld1w_z_4         = 3
   case ld1w_z_strided_2 = 4
   case ld1w_z_strided_4 = 5
-  case ldr_za           = 6
-  case str_z            = 7
-  case st1w_z_1         = 8
-  case st1w_z_2         = 9
-  case st1w_z_4         = 10
-  case st1w_z_strided_2 = 11
-  case st1w_z_strided_4 = 12
-  case str_za           = 13
+  case ld1d_z_strided_4 = 6
+  case ldr_za           = 7
+  case str_z            = 8
+  case st1w_z_1         = 9
+  case st1w_z_2         = 10
+  case st1w_z_4         = 11
+  case st1w_z_strided_2 = 12
+  case st1w_z_strided_4 = 13
+  case str_za           = 14
+  case ld1h_z_1       = 15
+  case ld1h_z_4       = 16
 }
 
 enum QoS: Int32 {
@@ -79,7 +82,7 @@ struct ContentView: View {
           Text("Showcase").tag(    BenchType.showcase  )
         }
 
-        if( bench_type == BenchType.micro || bench_type == BenchType.gemm ) {
+          if( bench_type == BenchType.micro || bench_type == BenchType.gemm) {
           Picker("Number of Threads", selection: $num_threads) {
             ForEach(1..<21) {
               Text("\($0)").tag($0)
@@ -102,6 +105,7 @@ struct ContentView: View {
                      BandwidthKernel.ld1w_z_4,
                      BandwidthKernel.ld1w_z_strided_2,
                      BandwidthKernel.ld1w_z_strided_4,
+                     BandwidthKernel.ld1d_z_strided_4,
                      BandwidthKernel.ldr_za,
                      BandwidthKernel.str_z,
                      BandwidthKernel.st1w_z_1,
@@ -109,7 +113,9 @@ struct ContentView: View {
                      BandwidthKernel.st1w_z_4,
                      BandwidthKernel.st1w_z_strided_2,
                      BandwidthKernel.st1w_z_strided_4,
-                     BandwidthKernel.str_za], id: \.self) { kernel in
+                     BandwidthKernel.str_za,
+                     BandwidthKernel.ld1h_z_1,
+                     BandwidthKernel.ld1h_z_4], id: \.self) { kernel in
               Toggle("\(kernel)", isOn: Binding(
                 get: { bandwidth_kernel.contains(kernel) },
                 set: { isOn in
@@ -136,6 +142,12 @@ struct ContentView: View {
               ))
             }
           }
+            Picker("Number of Threads", selection: $num_threads) {
+              ForEach(1..<21) {
+                Text("\($0)").tag($0)
+              }
+            }
+            
           Picker("Quality of Service", selection: $qos) {
             Text("Default").tag(          QoS.default_qos      )
             Text("User Interactive").tag( QoS.user_interactive )
@@ -178,7 +190,7 @@ struct ContentView: View {
           else if( bench_type == BenchType.bandwidth ) {
             for al in align_bytes {
               for kernel in bandwidth_kernel {
-                run_bandwidth_benchmark( Int32(kernel.rawValue),
+                  run_bandwidth_benchmark( Int32(num_threads),Int32(kernel.rawValue),
                                          Int32(al),
                                          qos.rawValue )
               }
@@ -202,7 +214,8 @@ struct ContentView: View {
             }
           }
           else if( bench_type == BenchType.gemm ) {
-            run_gemm( Int32(num_threads),
+              showcase_cachetest()
+              run_gemm( Int32(num_threads),
                       qos.rawValue )
           }
           else if( bench_type == BenchType.showcase ) {
